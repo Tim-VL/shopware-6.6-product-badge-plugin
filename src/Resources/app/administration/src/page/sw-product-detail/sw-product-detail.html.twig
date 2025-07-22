@@ -1,0 +1,10 @@
+{% block sw_product_detail_content_tabs_reviews %}
+    {% parent %}
+
+    <sw-tabs-item
+        :route="{ name: 'sw.product.detail.badges', params: { id: $route.params.id } }"
+        :title="$tc('swag-product-badges.productDetail.tabTitle')"
+    >
+        {{ $tc('swag-product-badges.productDetail.tabTitle') }}
+    </sw-tabs-item>
+{% endblock %}

@@ -1,0 +1,39 @@
+{
+    "name": "swag/product-badges",
+    "description": "Shopware 6 plugin to add customizable badges to product images",
+    "version": "v1.0.0",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Swag Product Badges",
+            "role": "Manufacturer"
+        }
+    ],
+    "require": {
+        "shopware/core": "~6.6",
+        "shopware/administration": "~6.6",
+        "shopware/storefront": "~6.6"
+    },
+    "type": "shopware-platform-plugin",
+    "autoload": {
+        "psr-4": {
+            "Swag\\ProductBadges\\": "src/"
+        }
+    },
+    "extra": {
+        "shopware-plugin-class": "Swag\\ProductBadges\\SwagProductBadges",
+        "label": {
+            "en-GB": "Product Badges",
+            "de-DE": "Produkt Badges"
+        },
+        "description": {
+            "de-DE": "Fügt anpassbare Badges/Icons zu Produktbildern hinzu",
+            "en-GB": "Adds customizable badges/icons to product images"
+        },
+        "manufacturerLink": {
+            "en-GB": "https://example.com",
+            "de-DE": "https://example.com"
+        },
+        "plugin-icon": "src/Resources/config/plugin.png"
+    }
+}

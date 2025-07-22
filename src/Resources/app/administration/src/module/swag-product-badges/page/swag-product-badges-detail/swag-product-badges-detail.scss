@@ -1,0 +1,93 @@
+.swag-product-badges-detail {
+    .sw-card {
+        margin-bottom: 1rem;
+        
+        // Ensure consistent card styling
+        &:not(:last-child) {
+            margin-bottom: 1.5rem;
+        }
+    }
+
+    .sw-container {
+        gap: 1rem;
+    }
+
+    // Fix container overflow issues
+    .sw-card .sw-container {
+        overflow-x: hidden;
+    }
+
+    // Ensure proper spacing and visibility for assignment card
+    .sw-card:last-child {
+        margin-bottom: 2rem;
+    }
+    
+    .sw-card.has--header {
+        height: auto;
+        height: 620px;
+    }
+
+    .sw-card__content {
+        height: 557px;
+        padding: 1.5rem;
+    }
+
+    // Specific styling for assignment card
+    .swag-product-badges-assignment {
+        min-height: 300px;
+        
+        .sw-empty-state {
+            margin: 2rem 0;
+        }
+    }
+    .sw-empty-state.sw-empty-state--absolute {
+        overflow: inherit;
+    }
+    .sw-empty-state__element {
+        position: relative;
+        bottom: 250px;
+    }
+    
+}
+
+.swag-product-badges-modal {
+    .sw-modal__dialog {
+        height: 960px;
+        overflow-x: hidden;
+    }
+
+    .sw-modal__body {
+        max-height: calc(90vh - 120px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 0px;
+    }
+    .sw-pagination__per-page {
+        right: 25px;
+    }
+
+    .swag-product-badges-assignment__modal-actions {
+        display: flex;
+        gap: 5px;
+        flex-direction: row;
+    }
+
+}
+
+.swag-product-badges-assignment {
+    min-height: 500px;
+    .swag-product-badges-assignment__listing {
+        height: 550px;
+        overflow-y: auto;
+    }
+}
+
+.swag-product-badges-assignment__toolbar {
+    .swag-product-badges-assignment__listing {
+        height: 550px;
+        overflow-y: auto;
+    }
+    .sw-data-grid__wrapper {
+        overflow-x: hidden;
+    }
+}

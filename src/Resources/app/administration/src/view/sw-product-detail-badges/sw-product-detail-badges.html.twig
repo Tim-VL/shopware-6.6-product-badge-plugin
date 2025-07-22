@@ -1,0 +1,164 @@
+<sw-card 
+    :title="$tc('swag-product-badges.productDetail.tabTitle')" 
+    :isLoading="isLoading"
+    class="swag-product-detail-badges"
+>
+    {% block swag_product_detail_badges_header %}
+        <template #toolbar>
+            <sw-button 
+                @click="onAddBadge"
+                variant="primary"
+                size="small">
+                {{ $tc('swag-product-badges.productDetail.buttonAddBadge') }}
+            </sw-button>
+        </template>
+    {% endblock %}
+
+    <template v-if="isLoading">
+        <sw-skeleton />
+        <sw-skeleton />
+    </template>
+
+    <template v-else>
+        <sw-data-grid
+            v-if="badges.length > 0"
+            :dataSource="badges"
+            :columns="columns"
+            :showSelection="false"
+            :showActions="true"
+            :isLoading="isLoading"
+        >
+            <template #column-image="{ item }">
+                <div class="swag-product-detail-badges__image-wrapper">
+                    <sw-media-preview-v2 :source="item.image" />
+                </div>
+            </template>
+
+            <template #column-productImage="{ item }">
+                <div class="swag-product-detail-badges__image-wrapper">
+                    <sw-media-preview-v2 
+                        v-if="item.productImage" 
+                        :source="item.productImage" 
+                    />
+                    <span v-else>
+                        {{ $tc('swag-product-badges.productDetail.noCover') }}
+                    </span>
+                </div>
+            </template>
+
+            <template #column-label="{ item }">
+                {{ item.label || item.name }}
+            </template>
+
+            <template #column-active="{ item }">
+                <sw-icon
+                    v-if="item.active"
+                    name="regular-checkmark-xs"
+                    small
+                    class="is--active"
+                />
+                <sw-icon
+                    v-else
+                    name="regular-times-s"
+                    small
+                    class="is--inactive"
+                />
+            </template>
+
+            <template #column-createdAt="{ item }">
+                {{ dateFilter(item.createdAt) }}
+            </template>
+
+            {% block swag_product_detail_badges_actions %}
+                <template #actions="{ item }">
+                    <sw-context-menu-item 
+                        @click="onRemoveBadge(item)"
+                        variant="danger">
+                        {{ $tc('swag-product-badges.productDetail.contextMenuRemove') }}
+                    </sw-context-menu-item>
+                </template>
+            {% endblock %}
+        </sw-data-grid>
+
+        <sw-empty-state
+            v-else
+            :title="$tc('swag-product-badges.productDetail.emptyTitle')"
+            :subline="$tc('swag-product-badges.productDetail.emptySubline')"
+        />
+    </template>
+
+    {% block swag_product_detail_badges_add_modal %}
+        <sw-modal 
+            v-if="showAddBadgeModal"
+            @modal-close="onCloseAddBadgeModal"
+            :title="$tc('swag-product-badges.productDetail.modalTitleAddBadge')"
+            variant="large"
+            class="swag-product-badge-product-tab-modal">
+            
+            {% block swag_product_detail_badges_add_modal_content %}
+                <div class="swag-product-badges-add-modal">
+                    <sw-data-grid
+                        v-if="badgeProductCombinations.length > 0"
+                        :dataSource="badgeProductCombinations"
+                        :columns="modalColumns"
+                        :showSelection="false"
+                        :showActions="false"
+                        :isLoading="false"
+                        class="swag-product-badges-add-modal__grid"
+                    >
+                        <template #column-badgeName="{ item }">
+                            {{ item.badgeName }}
+                        </template>
+
+                        <template #column-badgeImage="{ item }">
+                            <div class="swag-product-badges-add-modal__image">
+                                <sw-media-preview-v2 
+                                    v-if="item.badgeImage" 
+                                    :source="item.badgeImage" 
+                                />
+                                <div v-else class="swag-product-badges-add-modal__no-image">
+                                    {{ $tc('swag-product-badges.productDetail.noImage') }}
+                                </div>
+                            </div>
+                        </template>
+
+                        <template #column-productImage="{ item }">
+                            <div class="swag-product-badges-add-modal__image">
+                                <sw-media-preview-v2 
+                                    v-if="item.productImage" 
+                                    :source="item.productImage.media" 
+                                />
+                                <div v-else class="swag-product-badges-add-modal__no-image">
+                                    {{ $tc('swag-product-badges.productDetail.noSpecificImage') }}
+                                </div>
+                            </div>
+                        </template>
+
+                        <template #column-actions="{ item }">
+                            <sw-button 
+                                @click="onAssignBadge(item)"
+                                variant="primary"
+                                size="small">
+                                {{ $tc('swag-product-badges.productDetail.buttonAssign') }}
+                            </sw-button>
+                        </template>
+                    </sw-data-grid>
+
+                    <sw-empty-state
+                        v-else
+                        :title="$tc('swag-product-badges.productDetail.modal.emptyTitle')"
+                        :subline="$tc('swag-product-badges.productDetail.modal.emptySubline')"
+                    />
+                </div>
+            {% endblock %}
+
+            {% block swag_product_detail_badges_add_modal_footer %}
+                <template #modal-footer>
+                    <sw-button @click="onCloseAddBadgeModal" size="small">
+                        {{ $tc('swag-product-badges.productDetail.buttonCancel') }}
+                    </sw-button>
+                </template>
+            {% endblock %}
+        </sw-modal>
+    {% endblock %}
+</sw-card>

@@ -1,0 +1,86 @@
+{% sw_extends '@Storefront/storefront/element/cms-element-image-gallery.html.twig' %}
+
+
+{% block element_image_gallery_inner_item %}
+    <div class="gallery-slider-item-container">
+
+        <div class="gallery-slider-item is-{{ displayMode }} js-magnifier-container"{% if minHeight %} style="min-height: {{ minHeight }}"{% endif %}>
+            {% if image.extensions.product_image_badges is defined %}
+                {% set validBadges = [] %}
+                {% for badge in image.extensions.product_image_badges.badges %}
+                    {% if badge.mediaId == image.id %}
+                        {% set validBadges = validBadges|merge([badge]) %}
+                    {% endif %}
+                {% endfor %}
+
+                {% if validBadges|length > 0 %}
+                    <div class="product-image-badges">
+                        {% for badge in validBadges %}
+                            {% if badge.type == 'image' %}
+                                <span class="product-image-badge product-detail-image-badge--{{ badge.position2 }}" style="position:absolute;">
+                                    <img src="{{ badge.url }}" 
+                                         alt="{{ badge.alt }}" 
+                                         title="{{ badge.alt }}" 
+                                         loading="lazy"
+                                         style="max-width: {{config('SwagProductBadges.config.badgeImageWidth')}}; max-height: {{config('SwagProductBadges.config.badgeImageHeight')}};"/>
+                                </span>
+                            {% elseif badge.type == 'label' %}
+                                <span class="product-badge-label product-detail-badge-label--{{ badge.position2|default('top-right') }}" 
+                                    style="color: {{ config('SwagProductBadges.config.labelTextColor') }}; 
+                                            background-color: {{ config('SwagProductBadges.config.labelBackgroundColor') }}; 
+                                            font-size: {{ config('SwagProductBadges.config.labelFontSize') }};
+                                            position:absolute;">
+                                {{ badge.label }}
+                                </span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            {{ parent() }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block element_image_gallery_inner_single %}
+    <div class="gallery-slider-single-image is-{{ displayMode }} js-magnifier-container swag-product-badges-container"{% if minHeight %} style="min-height: {{ minHeight }}"{% endif %}>
+        {% set firstMedia = mediaItems|first %}
+        
+        {% if firstMedia.extensions.product_image_badges is defined %}
+            {% set validBadges = [] %}
+            {% for badge in firstMedia.extensions.product_image_badges.badges %}
+                {% if badge.mediaId == firstMedia.id %}
+                    {% set validBadges = validBadges|merge([badge]) %}
+                {% endif %}
+            {% endfor %}
+
+            {% if validBadges|length > 0 %}
+                <div class="product-image-badges">
+                    {% for badge in validBadges %}
+                        {% if badge.type == 'image' and badge.url is defined %}
+                            <span class="product-image-badge product-detail-image-badge--{{ badge.position2|default('top-right') }}"
+                            style="position:absolute;">
+                                <img src="{{ badge.url }}" 
+                                     alt="{{ badge.alt|default('') }}" 
+                                     title="{{ badge.alt|default('') }}" 
+                                     loading="lazy"
+                                     style="max-width: {{config('SwagProductBadges.config.badgeImageWidth')}}; max-height: {{config('SwagProductBadges.config.badgeImageHeight')}};"/>
+                            </span>
+                        {% elseif badge.type == 'label' and badge.label is defined %}
+                           <span class="product-badge-label product-detail-badge-label--{{ badge.position2|default('top-right') }}" 
+                                style="color: {{ config('SwagProductBadges.config.labelTextColor') }}; 
+                                        background-color: {{ config('SwagProductBadges.config.labelBackgroundColor') }}; 
+                                        font-size: {{ config('SwagProductBadges.config.labelFontSize') }};
+                                        position:absolute;">
+                            {{ badge.label }}
+                            </span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endif %}
+        
+        {{ parent() }}
+    </div>
+{% endblock %}

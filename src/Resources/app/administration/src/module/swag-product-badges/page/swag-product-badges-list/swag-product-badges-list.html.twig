@@ -1,0 +1,184 @@
+{% block swag_product_badges_list %}
+    <sw-page class="swag-product-badges-list">
+        {% block swag_product_badges_list_search_bar %}
+            <template #search-bar>
+                <sw-search-bar 
+                    :initialSearchType="$t('swag-product-badges.general.mainMenuItemGeneral')"
+                    :placeholder="$t('swag-product-badges.general.placeholderSearchBar')"
+                    :initialSearch="term"
+                    @search="onSearch">
+                </sw-search-bar>
+            </template>
+        {% endblock %}
+
+        {% block swag_product_badges_list_smart_bar_header %}
+            <template #smart-bar-header>
+                {% block swag_product_badges_list_smart_bar_header_title %}
+                    <h2>
+                        {% block swag_product_badges_list_smart_bar_header_title_text %}
+                            {{ $t('swag-product-badges.list.textTitle') }}
+                        {% endblock %}
+
+                        {% block swag_product_badges_list_smart_bar_header_amount %}
+                            <span v-if="!isLoading" class="sw-page__smart-bar-amount">
+                                ({{ total }})
+                            </span>
+                        {% endblock %}
+                    </h2>
+                {% endblock %}
+            </template>
+        {% endblock %}
+
+        {% block swag_product_badges_list_smart_bar_actions %}
+            <template #smart-bar-actions>
+                {% block swag_product_badges_list_smart_bar_actions_bulk_delete %}
+                    <sw-button v-if="selectionCount > 0"
+                            @click="onBulkDeleteButtonClick"
+                            variant="danger"
+                            size="small">
+                        {{ $t('swag-product-badges.list.buttonBulkDelete') }} ({{ selectionCount }})
+                    </sw-button>
+                {% endblock %}
+
+
+                {% block swag_product_badges_list_smart_bar_actions_add %}
+                    <sw-button :routerLink="{ name: 'swag.product.badges.create' }" variant="primary">
+                        {{ $t('swag-product-badges.list.buttonAddBadge') }}
+                    </sw-button>
+                {% endblock %}
+            </template>
+        {% endblock %}
+
+        <template #content>
+            {% block swag_product_badges_list_content %}
+                <div class="swag-product-badges-list__content">
+                    {% block swag_product_badges_list_grid %}
+                        <sw-data-grid
+                            v-if="items && items.length > 0"
+                            :dataSource="items"
+                            ref="dataGrid"
+                            :columns="columns"
+                            :selection="selection"
+                            :sortBy="sortBy"
+                            :showSelection="true"
+                            :allowInlineEdit="false"
+                            :allowColumnEdit="false"
+                            :sortDirection="sortDirection"
+                            :naturalSorting="naturalSorting"
+                            :isLoading="isLoading"
+                            :skeletonItemAmount="limit"
+                            @selection-change="onSelectionChanged"
+                            @column-sort="onSortColumn"
+                            identifier="swag-product-badges-list">
+                            {% block swag_product_badges_list_grid_columns_label %}
+                                <template #column-label="{ item }">
+                                    <span v-if="item.label">{{ item.label }}</span>
+                                    <span v-else class="sw-data-grid__cell-content--empty">-</span>
+                                </template>
+                            {% endblock %}
+
+                            {% block swag_product_badges_list_grid_columns_image %}
+                                <template #column-image="{ item }">
+                                    <div class="swag-product-badges-list__image-wrapper" v-if="item.image && item.image.url">
+                                        <img :src="item.image.url" 
+                                            :alt="item.image.alt || item.altText || item.name"
+                                            class="swag-product-badges-list__image"
+                                            @error="$event.target.style.display='none'">
+                                    </div>
+                                    <span v-else class="sw-data-grid__cell-content--empty">-</span>
+                                </template>
+                            {% endblock %}
+
+                            {% block swag_product_badges_list_grid_columns_created_at %}
+                                <template #column-createdAt="{ item }">
+                                    <span v-if="item.createdAt">
+                                        {{ dateFilter(item.createdAt) }}
+                                    </span>
+                                    <span v-else class="sw-data-grid__cell-content--empty">-</span>
+                                </template>
+                            {% endblock %}
+
+                            {% block swag_product_badges_list_grid_columns_actions %}
+                                <template #actions="{ item }">
+                                    {% block swag_product_badges_list_grid_columns_actions_edit %}
+                                        <sw-context-menu-item class="swag-product-badge-list__edit-action"
+                                                            :routerLink="{ name: 'swag.product.badges.detail', params: { id: item.id } }">
+                                            {{ $t('swag-product-badges.list.contextMenuEdit') }}
+                                        </sw-context-menu-item>
+                                    {% endblock %}
+
+                                    {% block swag_product_badges_list_grid_columns_actions_delete %}
+                                        <sw-context-menu-item @click="onDeleteBadge(item.id)"
+                                                            variant="danger">
+                                            {{ $t('swag-product-badges.list.contextMenuDelete') }}
+                                        </sw-context-menu-item>
+                                    {% endblock %}
+                                </template>
+                            {% endblock %}
+                        </sw-data-grid>
+
+                        <sw-pagination v-if="!isLoading && total > limit"
+                            :page="page"
+                            :limit="limit"
+                            :total="total"
+                            :total-visible="7"
+                            @page-change="onPageChange">
+                        </sw-pagination>
+                    {% endblock %}
+
+
+
+                    {% block swag_product_badges_list_empty_state %}
+                        <sw-empty-state v-if="!isLoading && (!items || items.length === 0)"
+                                        :title="$t('swag-product-badges.list.messageEmpty')">
+                        </sw-empty-state>
+                    {% endblock %}
+                </div>
+            {% endblock %}
+            {% block swag_product_badges_list_bulk_delete_modal %}
+                <sw-modal v-if="showBulkDeleteModal"
+                        @modal-close="onCloseBulkDeleteModal"
+                        :title="$t('swag-product-badges.list.modalTitleBulkDelete')"
+                        variant="small">
+                    {% block swag_product_badges_list_bulk_delete_modal_confirm_text %}
+                        <p class="swag-product-badges-list__confirm-bulk-delete-text">
+                            {{ $t('swag-product-badges.list.textBulkDeleteConfirm') }}
+                        </p>
+                    {% endblock %}
+
+                    {% block swag_product_badges_list_bulk_delete_modal_footer %}
+                        <template #modal-footer>
+                            {% block swag_product_badges_list_bulk_delete_modal_cancel %}
+                                <sw-button @click="onCloseBulkDeleteModal" size="small">
+                                    {{ $t('swag-product-badges.list.buttonCancel') }}
+                                </sw-button>
+                            {% endblock %}
+
+                            {% block swag_product_badges_list_bulk_delete_modal_confirm %}
+                                <sw-button @click="onConfirmBulkDelete" variant="danger" size="small">
+                                    {{ $t('swag-product-badges.list.buttonDelete') }}
+                                </sw-button>
+                            {% endblock %}
+                        </template>
+                    {% endblock %}
+                </sw-modal>
+            {% endblock %}
+        </template>
+
+        {% block swag_product_badges_list_sidebar %}
+            <template #sidebar>
+                <sw-sidebar>
+                    {% block swag_product_badges_list_sidebar_refresh %}
+                        <sw-sidebar-item
+                            icon="regular-undo"
+                            :title="$t('swag-product-badges.list.titleSidebarItemRefresh')"
+                            @click="onRefresh">
+                        </sw-sidebar-item>
+                    {% endblock %}
+                </sw-sidebar>
+            </template>
+        {% endblock %}
+        
+        
+    </sw-page>
+{% endblock %}

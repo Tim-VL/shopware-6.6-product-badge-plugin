@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/platform/trunk/src/Core/System/SystemConfig/Schema/config.xsd">
+
+    <card>
+        <title>Product Badges</title>
+        <title lang="de-DE">Produktabzeichen</title>
+
+        <input-field type="colorpicker">
+            <name>labelTextColor</name>
+            <label>Label Text Color</label>
+            <label lang="de-DE">Label Textfarbe</label>
+            <defaultValue>#000000</defaultValue>
+        </input-field>
+
+        <input-field type="colorpicker">
+            <name>labelBackgroundColor</name>
+            <label>Label Background Color</label>
+            <label lang="de-DE">Label Hintergrundfarbe</label>
+            <defaultValue>#06e8e0</defaultValue>
+        </input-field>
+
+        <input-field type="text">
+            <name>labelFontSize</name>
+            <label>Label Font Size</label>
+            <label lang="de-DE">Label Schriftgröße</label>
+            <defaultValue>14px</defaultValue>
+        </input-field>
+
+        <input-field type="text">
+            <name>badgeImageWidth</name>
+            <label>Badge Image Width</label>
+            <label lang="de-DE">Badge Bildbreite</label>
+            <defaultValue>50px</defaultValue>
+        </input-field>
+
+        <input-field type="text">
+            <name>badgeImageHeight</name>
+            <label>Badge Image Height</label>
+            <label lang="de-DE">Badge Bildhöhe</label>
+            <defaultValue>50px</defaultValue>
+        </input-field>
+       
+    </card>
+</config>

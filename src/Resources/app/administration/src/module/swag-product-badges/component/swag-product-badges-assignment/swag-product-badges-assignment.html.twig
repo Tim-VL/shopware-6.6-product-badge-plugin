@@ -1,0 +1,296 @@
+{% block swag_product_badges_assignment %}
+    <div class="swag-product-badges-assignment">
+        {% block swag_product_badges_assignment_card_content %}
+            {% block swag_product_badges_assignment_toolbar %}
+                <div class="swag-product-badges-assignment__toolbar">
+                    <sw-button v-if="selectionCount > 0"
+                            @click="onBulkDeleteButtonClick"
+                            variant="danger"
+                            size="small">
+                        <sw-icon name="regular-trash" size="16"></sw-icon>
+                        {{ $t('swag-product-badges.list.buttonBulkDelete') }} ({{ selectionCount }})
+                    </sw-button>
+                    
+                    <sw-button @click="onAddProducts" variant="primary" size="small">
+                        <sw-icon name="regular-plus" size="16"></sw-icon>
+                        {{ $t('swag-product-badges.list.buttonAddProducts') }}
+                    </sw-button>
+                </div>
+            {% endblock %}
+
+            {% block swag_product_badges_assignment_grid %}
+                <sw-data-grid
+                    v-if="assignments"
+                    :dataSource="assignments"
+                    :columns="assignmentColumns"
+                    :isLoading="isLoading"
+                    :showSelection="true"
+                    :selection="selection"
+                    @selection-change="onSelectionChanged"
+                    @page-change="onPageChange"
+                    @refresh="onRefresh"
+                    :page="page"
+                    :limit="limit"
+                    :total="total"
+                    :showPagination="true"
+                    :allowInlineEdit="false"
+                    :allowColumnEdit="false"
+                    ref="assignmentGrid"
+                    identifier="swag-product-badges-assignment-list"
+                    class="swag-product-badges-assignment__listing">
+
+                    {% block swag_product_badges_assignment_grid_columns_media %}
+                        <template #column-media="{ item }">
+                            <div class="swag-product-badges-assignment__image-wrapper" v-if="item.media && item.media.url">
+                                <img :src="item.media.url" 
+                                    :alt="item.media.alt || item.media.fileName || 'Product media'"
+                                    class="swag-product-badges-assignment__image"
+                                    @error="$event.target.style.display='none'">
+                            </div>
+                            <span v-else class="sw-data-grid__cell-content--empty">-</span>
+                        </template>
+                    {% endblock %}
+
+                    {% block swag_product_badges_assignment_grid_actions %}
+                        <template #actions="{ item }">
+                            <sw-context-menu-item @click="onDeleteAssignment(item.id)" variant="danger">
+                                <sw-icon name="regular-trash" size="16"></sw-icon>
+                                {{ $t('swag-product-badges.assignment.contextMenuUnassign') }}
+                            </sw-context-menu-item>
+                        </template>
+                    {% endblock %}
+
+                    {% block swag_product_badges_assignment_grid_pagination %}
+                        <template #pagination>
+                            <sw-pagination
+                                :page="page"
+                                :limit="limit"
+                                :total="total"
+                                :total-visible="7"
+                                :steps="[25, 50, 75, 100]"
+                                @page-change="onPageChange">
+                            </sw-pagination>
+                        </template>
+                    {% endblock %}
+                </sw-data-grid>
+            {% endblock %}
+
+            {% block swag_product_badges_assignment_empty_state %}
+                <sw-empty-state v-if="!isLoading && assignments && assignments.length === 0"
+                                :title="$t('swag-product-badges.assignment.messageEmpty')"
+                                icon="regular-products">
+                    <p>{{ $t('swag-product-badges.assignment.messageEmptyDescription') }}</p>
+                </sw-empty-state>
+            {% endblock %}
+        {% endblock %}
+    </div>
+
+    <!-- MODALS - These should be outside the main component div to avoid breaking card layout -->
+    {% block swag_product_badges_assignment_modals %}
+        {% block swag_product_badges_assignment_product_modal %}
+            <sw-modal v-if="showProductModal"
+                @modal-close="onCloseProductModal"
+                :title="$t('swag-product-badges.assignment.modalTitleSelectProducts')"
+                variant="large"
+                class="swag-product-badges-modal">
+
+                {% block swag_product_badges_assignment_product_modal_grid %}
+                    <div class="swag-product-badges-assignment__product-selection">
+                        <sw-entity-multi-select
+                            :entity-collection="productCollection"
+                            :local-mode="false"
+                            entity="product"
+                            :criteria="productCriteria"
+                            label-property="name"
+                            :placeholder="$t('swag-product-badges.assignment.selectProductsPlaceholder')"
+                            @update:entity-collection="onUpdateProductCollection"
+                            class="swag-product-badges-assignment__product-select"
+                        >
+                            <template #selection-label-property="{ item }">
+                                {{ item.translated?.name || item.name }} ({{ item.productNumber }})
+                            </template>
+
+                            <template #result-item="{ item, index, labelProperty, searchTerm, highlightSearchTerm, isSelected, addItem, getKey }">
+                                <li is="sw-select-result"
+                                    :selected="isSelected(item)"  
+                                    v-bind="{ item, index }"
+                                    @click="addItem(item)">
+                                    <sw-product-variant-info v-if="item.variation && item.variation.length > 0" :variations="item.variation">
+                                        {{ item.translated?.name || item.name }} ({{ item.productNumber }})
+                                    </sw-product-variant-info>
+                                    <span v-else>{{ item.translated?.name || item.name }} ({{ item.productNumber }})</span>
+                                </li>
+                            </template>
+
+                        </sw-entity-multi-select>
+                    </div>
+                {% endblock %}
+
+
+                {% block swag_product_badges_assignment_product_modal_footer %}
+                    <template #modal-footer>
+                        <div class="swag-product-badges-assignment__modal-actions">
+                            <sw-button @click="onCloseProductModal" size="small">
+                                {{ $t('swag-product-badges.assignment.buttonCancel') }}
+                            </sw-button>
+                            <sw-button @click="onShowImageSelection" 
+                                       variant="primary" 
+                                       size="small" 
+                                       :disabled="selectedProducts.length === 0">
+                                {{ $t('swag-product-badges.assignment.buttonNext') }}
+                                <sw-icon name="regular-chevron-right" size="16"></sw-icon>
+                            </sw-button>
+                        </div>
+                    </template>
+                {% endblock %}
+            </sw-modal>
+        {% endblock %}
+
+        {% block swag_product_badges_assignment_image_modal %}
+            <sw-modal v-if="showImageModal"
+                      @modal-close="onCloseImageModal"
+                      :title="$t('swag-product-badges.assignment.modalTitleSelectImages')"
+                      variant="large"
+                      class="swag-product-badges-modal swag-product-badges-modal--image-selection">
+
+                {% block swag_product_badges_assignment_image_modal_content %}
+                    <div class="swag-product-badges-assignment__image-selection">
+                        <div class="swag-product-badges-assignment__selection-info">
+                            <sw-alert variant="info" :showIcon="true">
+                                {{ $t('swag-product-badges.assignment.imageSelectionInfo') }}
+                            </sw-alert>
+                        </div>
+
+                        <!-- Global Select All Checkbox -->
+                        <div class="global-select-all-section">
+                            <sw-checkbox-field 
+                                :value="areAllImagesSelected"
+                                @update:value="toggleAllImages"
+                                :label="$t('swag-product-badges.assignment.selectAllImages')"
+                                class="global-select-all-checkbox">
+                            </sw-checkbox-field>
+                        </div>
+
+                        <div v-for="product in selectedProducts" :key="product.id" class="product-images-section">
+                            <div class="product-header">
+                                <h3>
+                                    <sw-icon name="regular-products" size="20"></sw-icon>
+                                    {{ product.name }} 
+                                    <span class="product-number">({{ product.productNumber }})</span>
+                                </h3>
+                                
+                                <!-- Product-specific Select All Checkbox -->
+                                <sw-checkbox-field 
+                                    v-if="getProductMedia(product).length > 0"
+                                    :value="areAllProductImagesSelected(product.id)"
+                                    @update:value="toggleAllProductImages(product.id)"
+                                    :label="$t('swag-product-badges.assignment.selectAllImagesForProduct')"
+                                    class="product-select-all-checkbox">
+                                </sw-checkbox-field>
+                            </div>
+                            
+                            {% block swag_product_badges_assignment_product_images %}
+                                <div class="product-images-grid">
+                                    <div v-for="media in getProductMedia(product)" 
+                                        :key="media.id" 
+                                        class="image-item"
+                                        :class="{ 'selected': isImageSelected(product.id, media.id), 'parent-media': media.isParentMedia }"
+                                        @click="toggleImageSelection(product.id, media.id)"
+                                        :title="(media.alt || media.fileName) + (media.isParentMedia ? ' (from parent)' : '')"
+                                        tabindex="0"
+                                        @keydown.enter="toggleImageSelection(product.id, media.id)"
+                                        @keydown.space.prevent="toggleImageSelection(product.id, media.id)">
+                                        
+                                        <div class="image-container">
+                                            <img :src="media.url" 
+                                                :alt="media.alt || media.fileName" 
+                                                class="product-image"
+                                                loading="lazy" />
+                                            <span v-if="media.isParentMedia" class="parent-media-badge">Parent</span>
+                                        </div>
+                                        
+                                        <sw-checkbox-field 
+                                            :value="isImageSelected(product.id, media.id)"
+                                            @update:value="toggleImageSelection(product.id, media.id)"
+                                            class="image-checkbox">
+                                        </sw-checkbox-field>
+                                    </div>
+                                </div>
+                            {% endblock %}
+
+                            <!-- Show message if product has no images -->
+                            <div v-if="!getProductMedia(product) || getProductMedia(product).length === 0" 
+                                class="no-images-available">
+                                <sw-alert variant="warning" :showIcon="true">
+                                    {{ $t('swag-product-badges.assignment.noImagesForProduct') }}
+                                </sw-alert>
+                            </div>
+                        </div>
+
+                        <!-- Selection summary -->
+                        <div class="selection-summary" v-if="selectedImages.length > 0">
+                            <sw-card :title="$t('swag-product-badges.assignment.selectionSummary')" size="small">
+                                <p>
+                                    {{ $t('swag-product-badges.assignment.selectedImagesCount') }}: {{ selectedImages.length }}
+                                </p>
+                            </sw-card>
+                        </div>
+                    </div>
+                {% endblock %}
+
+
+                {% block swag_product_badges_assignment_image_modal_footer %}
+                    <template #modal-footer>
+                        <div class="swag-product-badges-assignment__modal-actions">
+                            <sw-button @click="onBackToProductSelection" size="small">
+                                <sw-icon name="regular-chevron-left" size="16"></sw-icon>
+                                {{ $t('swag-product-badges.assignment.buttonBack') }}
+                            </sw-button>
+                            <sw-button @click="onCloseImageModal" size="small">
+                                {{ $t('swag-product-badges.assignment.buttonCancel') }}
+                            </sw-button>
+                            <sw-button @click="onAssignProductsWithImages" 
+                                       variant="primary" 
+                                       size="small" 
+                                       :disabled="selectedImages.length === 0"
+                                       class="assign-button">
+                                {{ $t('swag-product-badges.assignment.buttonAssign') }}
+                                <span v-if="selectedImages.length > 0" class="selection-count">({{ selectedImages.length }})</span>
+                            </sw-button>
+                        </div>
+                    </template>
+                {% endblock %}
+            </sw-modal>
+        {% endblock %}
+
+        {% block swag_product_badges_assignment_bulk_delete_modal %}
+            <sw-modal v-if="showBulkDeleteModal"
+                    @modal-close="onCloseBulkDeleteModal"
+                    :title="$t('swag-product-badges.list.modal2TitleBulkDelete')"
+                    variant="small">
+                {% block swag_product_badges_assignment_bulk_delete_modal_confirm_text %}
+                    <p class="swag-product-badges-assignment__confirm-bulk-delete-text">
+                        {{ $t('swag-product-badges.list.text2BulkDeleteConfirm') }}
+                    </p>
+                {% endblock %}
+
+                {% block swag_product_badges_assignment_bulk_delete_modal_footer %}
+                    <template #modal-footer>
+                        {% block swag_product_badges_assignment_bulk_delete_modal_cancel %}
+                            <sw-button @click="onCloseBulkDeleteModal" size="small">
+                                {{ $t('swag-product-badges.list.buttonCancel') }}
+                            </sw-button>
+                        {% endblock %}
+
+                        {% block swag_product_badges_assignment_bulk_delete_modal_confirm %}
+                            <sw-button @click="onConfirmBulkDelete" variant="danger" size="small">
+                                {{ $t('swag-product-badges.list.buttonDelete') }}
+                            </sw-button>
+                        {% endblock %}
+                    </template>
+                {% endblock %}
+            </sw-modal>
+        {% endblock %}
+
+    {% endblock %}
+{% endblock %}

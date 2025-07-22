@@ -1,0 +1,60 @@
+<?xml version="1.0" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <!-- Entity Definitions -->
+        <service id="Swag\ProductBadges\Core\Content\ProductBadge\ProductBadgeDefinition">
+            <tag name="shopware.entity.definition" entity="swag_product_badge" />
+        </service>
+        
+        <service id="Swag\ProductBadges\Core\Content\ProductBadge\Aggregate\ProductBadgeTranslation\ProductBadgeTranslationDefinition">
+            <tag name="shopware.entity.definition" entity="swag_product_badge_translation" />
+        </service>
+        
+        <service id="Swag\ProductBadges\Core\Content\ProductBadge\Aggregate\ProductBadgeProduct\ProductBadgeProductDefinition">
+            <tag name="shopware.entity.definition" entity="swag_product_badge_product" />
+        </service>
+
+        <!-- Service -->
+        <service id="Swag\ProductBadges\Service\ProductBadgeService">
+            <argument type="service" id="swag_product_badge.repository"/>
+            <argument type="service" id="swag_product_badge_product.repository"/>
+        </service>
+
+        <service id="Swag\ProductBadges\Service\ProductBadgeLoader">
+            <argument type="service" id="swag_product_badge_product.repository"/>
+            <argument type="service" id="media.repository"/>
+
+        </service>
+
+
+        <!-- Controllers -->
+        <service id="Swag\ProductBadges\Controller\Api\ProductBadgeController" public="true">
+            <argument type="service" id="swag_product_badge.repository"/>
+            <argument type="service" id="Swag\ProductBadges\Service\ProductBadgeService"/>
+            <argument type="service" id="Shopware\Core\Framework\Api\Response\ResponseFactoryRegistry"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+
+        <service id="Swag\ProductBadges\Controller\Api\ProductBadgeAssignmentController" public="true">
+            <argument type="service" id="swag_product_badge_product.repository"/>
+            <argument type="service" id="product.repository"/>
+            <argument type="service" id="Swag\ProductBadges\Service\ProductBadgeService"/>
+            <call method="setContainer">
+                <argument type="service" id="service_container"/>
+            </call>
+        </service>
+        <!-- Controller -->
+
+        <!-- Subscriber -->
+        <service id="Swag\ProductBadges\Subscriber\SwagProductBadgesEventSubscriber">
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="Swag\ProductBadges\Service\ProductBadgeLoader"/>
+        </service>
+        <!-- Subscriber -->
+    </services>
+</container>

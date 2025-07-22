@@ -1,0 +1,25 @@
+{% sw_extends '@Storefront/storefront/component/product/card/badges.html.twig' %}
+
+{% block component_product_badges %}
+    {{ parent() }}
+    
+    {% if product.cover and product.cover.media and product.cover.media.extensions.product_image_badges is defined %}
+        <div class="product-image-badges">
+            {% for badge in product.cover.media.extensions.product_image_badges.badges %}
+                    {% if badge.url is defined %}
+                        <span class="product-image-badge product-list-image-badge--{{ badge.position1|default('top-right') }}" style="position:absolute; ">
+                            <img src="{{ badge.url }}" alt="{{ badge.alt }}" title="{{ badge.alt }}" style="max-width: {{config('SwagProductBadges.config.badgeImageWidth')}}; max-height: {{config('SwagProductBadges.config.badgeImageHeight')}};" />
+                        </span>
+                    {% elseif badge.label is defined %}
+                    <span class="product-badge-label product-list-badge-label--{{ badge.position1|default('top-right') }}" 
+                        style="color: {{ config('SwagProductBadges.config.labelTextColor') }}; 
+                                background-color: {{ config('SwagProductBadges.config.labelBackgroundColor') }}; 
+                                font-size: {{ config('SwagProductBadges.config.labelFontSize') }};
+                                position:absolute;">
+                    {{ badge.label }}
+                    </span>
+                    {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}

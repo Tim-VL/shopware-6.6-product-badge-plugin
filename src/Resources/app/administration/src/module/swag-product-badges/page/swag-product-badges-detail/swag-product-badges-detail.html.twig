@@ -1,0 +1,147 @@
+{% block swag_product_badges_detail %}
+    <sw-page class="swag-product-badges-detail">
+
+        {% block swag_product_badges_detail_header %}
+            <template #smart-bar-header>
+                <h2>{{ isCreateMode ? $t('swag-product-badges.detail.textCreateNewBadge') : (badge ? badge.name : '') }}</h2>
+            </template>
+        {% endblock %}
+
+        {% block swag_product_badges_detail_actions %}
+            <template #smart-bar-actions>
+                {% block swag_product_badges_detail_actions_abort %}
+                    <sw-button :disabled="isLoading" @click="onCancel">
+                        {{ $t('swag-product-badges.detail.buttonCancel') }}
+                    </sw-button>
+                {% endblock %}
+
+                {% block swag_product_badges_detail_actions_save %}
+                    <sw-button-process
+                        :isLoading="isLoading"
+                        :processSuccess="processSuccess"
+                        :disabled="isLoading || !allowSave"
+                        variant="primary"
+                        @process-finish="saveFinish"
+                        @click="onClickSave">
+                        {{ isCreateMode ? $t('swag-product-badges.detail.buttonCreate') : $t('swag-product-badges.detail.buttonSave') }}
+                    </sw-button-process>
+                {% endblock %}
+            </template>
+        {% endblock %}
+
+
+        {% block swag_product_badges_detail_content %}
+            <template #content>
+                <sw-card-view v-if="badge">
+                    {% block swag_product_badges_detail_content_language_info %}
+                        <sw-language-info
+                            :entityDescription="badge.name || $t('swag-product-badges.detail.textHeadline')">
+                        </sw-language-info>
+                    {% endblock %}
+
+                    {% block swag_product_badges_detail_basic_info_card %}
+                        <sw-card :title="$t('swag-product-badges.detail.cardTitleBadgeInfo')" :isLoading="isLoading">
+                            <sw-container columns="1fr 1fr" gap="0px 30px">
+
+                                {% block swag_product_badges_detail_basic_info_field_name %}
+                                    <sw-text-field
+                                        v-model:value="badge.name"
+                                        :error="badgeNameError"
+                                        :label="$t('swag-product-badges.detail.labelName')"
+                                        :placeholder="$t('swag-product-badges.detail.placeholderName')"
+                                        required>
+                                    </sw-text-field>
+                                {% endblock %}
+
+                                {% block swag_product_badges_detail_basic_info_field_label %}
+                                    <sw-text-field
+                                        v-model:value="badge.label"
+                                        :label="$t('swag-product-badges.detail.labelBadgeLabel')"
+                                        :placeholder="$t('swag-product-badges.detail.placeholderBadgeLabel')"
+                                        required>
+                                    </sw-text-field>
+                                {% endblock %}
+
+                                {% block swag_product_badges_detail_basic_info_field_active %}
+                                    <sw-switch-field
+                                        v-model:value="badge.active"
+                                        :label="$t('swag-product-badges.detail.labelActive')">
+                                    </sw-switch-field>
+                                {% endblock %}
+
+                                {% block swag_product_badges_detail_basic_info_field_position1 %}
+                                    <sw-single-select
+                                        v-model:value="badge.position1"
+                                        :error="badgePosition1Error"
+                                        :label="$t('swag-product-badges.detail.labelPosition1')"
+                                        :options="[
+                                            { value: 'top-left', label: $t('swag-product-badges.detail.positionTopLeft') },
+                                            { value: 'top-right', label: $t('swag-product-badges.detail.positionTopRight') },
+                                            { value: 'bottom-left', label: $t('swag-product-badges.detail.positionBottomLeft') },
+                                            { value: 'bottom-right', label: $t('swag-product-badges.detail.positionBottomRight') }
+                                        ]"
+                                        required>
+                                    </sw-single-select>
+                                {% endblock %}
+
+                                {% block swag_product_badges_detail_basic_info_field_position2 %}
+                                    <sw-single-select
+                                        v-model:value="badge.position2"
+                                        :error="badgePosition2Error"
+                                        :label="$t('swag-product-badges.detail.labelPosition2')"
+                                        :options="[
+                                            { value: 'top-left', label: $t('swag-product-badges.detail.positionTopLeft') },
+                                            { value: 'top-right', label: $t('swag-product-badges.detail.positionTopRight') },
+                                            { value: 'bottom-left', label: $t('swag-product-badges.detail.positionBottomLeft') },
+                                            { value: 'bottom-right', label: $t('swag-product-badges.detail.positionBottomRight') }
+                                        ]"
+                                        required>
+                                    </sw-single-select>
+                                {% endblock %}
+                            </sw-container>
+
+                            <div style="margin-top: 1rem;">
+                                {% block swag_product_badges_detail_basic_info_field_image %}
+                                    <sw-upload-listener
+                                        :uploadTag="badge.id"
+                                        @media-upload-finish="setMediaItem"
+                                        autoUpload>
+                                    </sw-upload-listener>
+                                    <sw-media-upload-v2
+                                        :source="badge.imageId"
+                                        :allowMultiSelect="false"
+                                        :label="$t('swag-product-badges.detail.labelImage')"
+                                        :defaultFolder="badge.getEntityName()"
+                                        @media-drop="onDropMedia"
+                                        @media-upload-remove-image="onUnlinkMedia"
+                                        variant="regular"
+                                        :uploadTag="badge.id">
+                                    </sw-media-upload-v2>
+                                {% endblock %}
+                            </div>
+
+                        </sw-card>
+                    {% endblock %}
+
+                    {% block swag_product_badges_detail_assignment_card %}
+                        <sw-card :title="$t('swag-product-badges.detail.cardTitleAssignments')" :isLoading="isLoading">
+                            <swag-product-badges-assignment 
+                                :badgeId="badge.id" 
+                                :currentBadge="badge"
+                                v-if="!isCreateMode && badge && badge.id">
+                            </swag-product-badges-assignment>
+
+
+                            <sw-alert v-else variant="info">
+                                {{ $t('swag-product-badges.detail.messageCreateFirst') }}
+                            </sw-alert>
+                        </sw-card>
+                    {% endblock %}
+
+                </sw-card-view>
+                
+                <sw-loader v-else></sw-loader>
+            </template>
+        {% endblock %}
+    </sw-page>
+{% endblock %}
