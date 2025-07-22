@@ -20,8 +20,6 @@ Boost user engagement and drive sales by showcasing attractive product badges (l
 
 Guide for Product Badges Plugin for Shopware 6.5, 6.6 &amp; 6.7
 
-## Features
-
 ## Installation
 
 - Go to project root/custom/static-plugins and upload the Product Badges plugin file
